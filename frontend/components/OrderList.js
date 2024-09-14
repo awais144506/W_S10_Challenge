@@ -1,22 +1,17 @@
 import React from 'react'
-
+import { useGetOrdersQuery } from '../state/userApi'
 export default function OrderList() {
-  const orders = []
+  const {data:orders} = useGetOrdersQuery()
+  
   return (
     <div id="orderList">
       <h2>Pizza Orders</h2>
       <ol>
-        {
-          orders.map(() => {
-            return (
-              <li key={1}>
-                <div>
-                  order details here
-                </div>
-              </li>
-            )
-          })
-        }
+      {orders && orders.map(order => (
+          <li key={order.id}>
+            {order.customer} ordered a size {order.size} with {order.toppings} toppings
+          </li>
+        ))}
       </ol>
       <div id="sizeFilters">
         Filter by size:
