@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { userApi } from './userApi'
+import OrderReducer from './orderSlice'
 const exampleReducer = (state = { count: 0 }) => {
   return state
 }
@@ -7,6 +8,7 @@ const exampleReducer = (state = { count: 0 }) => {
 export const resetStore = () => configureStore({
   reducer: {
     example: exampleReducer,
+    Orders:OrderReducer,
     // add your reducer(s) here
     [userApi.reducerPath]:userApi.reducer
   },

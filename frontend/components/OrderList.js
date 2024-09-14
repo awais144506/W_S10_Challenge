@@ -2,14 +2,13 @@ import React from 'react'
 import { useGetOrdersQuery } from '../state/userApi'
 export default function OrderList() {
   const {data:orders} = useGetOrdersQuery()
-  
   return (
     <div id="orderList">
       <h2>Pizza Orders</h2>
       <ol>
       {orders && orders.map(order => (
           <li key={order.id}>
-            {order.customer} ordered a size {order.size} with {order.toppings} toppings
+            {order.customer} ordered a size {order.size} with {order.toppings.length} {order.toppings.length===1?"topping":"toppings"}
           </li>
         ))}
       </ol>
