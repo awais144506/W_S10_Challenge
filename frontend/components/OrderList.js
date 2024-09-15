@@ -8,9 +8,9 @@ export default function OrderList() {
       <ol>
         {orders && orders.map(order => (
           <li key={order.id}>
-            {order.customer} ordered a size {order.size} with
+            {order.customer} ordered a size {order.size} with 
             {(order.toppings && order.toppings.length > 0)
-              ? `${order.toppings.length} ${order.toppings.length === 1 ? 'topping' : 'toppings'}`
+              ? ` ${order.toppings.length} ${order.toppings.length === 1 ? ' topping' : ' toppings'}`
               : ' no toppings'} 
           </li>
         ))}

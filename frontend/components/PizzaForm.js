@@ -1,5 +1,4 @@
 import React, { useReducer, useState } from 'react';
-import * as yup from 'yup';
 import { useCreateNewOrderMutation } from '../state/userApi';
 
 const CHANGE_INPUT = 'CHANGE_INPUT';
@@ -11,11 +10,7 @@ const initialState = {
   toppings: [],
 };
 
-// YUP SCHEMA
-const schema = yup.object().shape({
-  fullName: yup.string().required('Full name is required').max(20, 'Max 20 characters').min(3, 'Min 3 characters'),
-  size: yup.string().oneOf(['S', 'M', 'L'], 'Invalid size selection').required('Size is required'),
-});
+
 
 // BUILD REDUCER TO HANDLE FORM
 const reducer = (state, action) => {
@@ -61,26 +56,16 @@ export default function PizzaForm() {
   };
 
   // OnSubmit with Yup validation
-  const onSubmit = async (e) => {
+  const onSubmit = (e) => {
     e.preventDefault();
-    try {
-      // Validate form data
-      await schema.validate(state, { abortEarly: false });
-      // If validation passes, submit the form
-      createNewOrder(state)
-        .unwrap()
-        .then(() => {
-          onReset();
-        })
-        .catch((err) => console.log(err));
-    } catch (err) {
-      // Capture validation errors and display them
-      const validationErrors = {};
-      err.inner.forEach((error) => {
-        validationErrors[error.path] = error.message;
-      });
-      setErrors(validationErrors);
-    }
+
+    createNewOrder(state)
+      .unwrap()
+      .then(() => {
+        onReset();
+      })
+      .catch((err) => console.log(err));
+
   };
 
   // JSX
