@@ -1,21 +1,20 @@
-import React, { useReducer } from 'react';
-//import { useDispatch } from 'react-redux';
+import React, { useReducer, useState } from 'react';
 import * as yup from 'yup';
 import { useCreateNewOrderMutation } from '../state/userApi';
+
 const CHANGE_INPUT = 'CHANGE_INPUT';
 const RESET_FORM = 'RESET_FORM';
 
 const initialState = {
   fullName: '',
   size: '',
-  toppings: []
+  toppings: [],
 };
 
 // YUP SCHEMA
 const schema = yup.object().shape({
-  fullName: yup.string().required().max(20).min(3),
-  size: yup.string().oneOf(['S', 'M', 'L'], 'Invalid Selection...').required(),
-  toppings: yup.array().min(1, 'Please select at least one topping')
+  fullName: yup.string().required('Full name is required').max(20, 'Max 20 characters').min(3, 'Min 3 characters'),
+  size: yup.string().oneOf(['S', 'M', 'L'], 'Invalid size selection').required('Size is required'),
 });
 
 // BUILD REDUCER TO HANDLE FORM
@@ -25,8 +24,8 @@ const reducer = (state, action) => {
       const { name, value } = action.payload;
       if (name === 'topping') {
         // Toggle topping
-        const updatedToppings = state.toppings.includes(name)
-          ? state.toppings.filter(topping => topping !== value)
+        const updatedToppings = state.toppings.includes(value)
+          ? state.toppings.filter((topping) => topping !== value)
           : [...state.toppings, value];
         return { ...state, toppings: updatedToppings };
       }
@@ -41,14 +40,15 @@ const reducer = (state, action) => {
 };
 
 export default function PizzaForm() {
-  
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [createNewOrder,{error:createOrderError,isLoading:creatingOrder}] = useCreateNewOrderMutation()
+  const [errors, setErrors] = useState({});
+  const [createNewOrder, { error: createOrderError, isLoading: creatingOrder }] = useCreateNewOrderMutation();
+
   // OnChange
   const onChange = (e) => {
-    const { name, value, type} = e.target;
+    const { name, value, type } = e.target;
     if (type === 'checkbox') {
-      dispatch({ type: CHANGE_INPUT, payload: { name: 'topping', value: name } });
+      dispatch({ type: CHANGE_INPUT, payload: { name: 'topping', value } });
     } else {
       dispatch({ type: CHANGE_INPUT, payload: { name, value } });
     }
@@ -57,19 +57,30 @@ export default function PizzaForm() {
   // OnReset
   const onReset = () => {
     dispatch({ type: RESET_FORM });
+    setErrors({});
   };
 
-  // OnSubmit
-  const onSubmit = (e) => {
+  // OnSubmit with Yup validation
+  const onSubmit = async (e) => {
     e.preventDefault();
-    // Here you should validate and submit the form
-    // You can use schema.validate() for validation
-    //dispatchForm(createNewOrder(state));
-    
-    createNewOrder(state).unwrap()
-    .then(()=>{
-      onReset()
-    }).catch(err=>console.log(err))
+    try {
+      // Validate form data
+      await schema.validate(state, { abortEarly: false });
+      // If validation passes, submit the form
+      createNewOrder(state)
+        .unwrap()
+        .then(() => {
+          onReset();
+        })
+        .catch((err) => console.log(err));
+    } catch (err) {
+      // Capture validation errors and display them
+      const validationErrors = {};
+      err.inner.forEach((error) => {
+        validationErrors[error.path] = error.message;
+      });
+      setErrors(validationErrors);
+    }
   };
 
   // JSX
@@ -77,7 +88,7 @@ export default function PizzaForm() {
     <form onSubmit={onSubmit}>
       <h2>Pizza Form</h2>
       {creatingOrder && <div className='pending'>Order in progress...</div>}
-      {createOrderError&&<div className='failure'>{createOrderError.data.message}</div>}
+      {createOrderError && <div className='failure'>{createOrderError.data.message}</div>}
 
       <div className="input-group">
         <div>
@@ -91,6 +102,7 @@ export default function PizzaForm() {
             value={state.fullName}
             onChange={onChange}
           />
+          {errors.fullName && <div className="error">{errors.fullName}</div>}
         </div>
       </div>
 
@@ -109,6 +121,7 @@ export default function PizzaForm() {
             <option value="M">Medium</option>
             <option value="L">Large</option>
           </select>
+          {errors.size && <div className="error">{errors.size}</div>}
         </div>
       </div>
 
@@ -117,9 +130,9 @@ export default function PizzaForm() {
           <input
             data-testid="checkPepperoni"
             name="1"
-            value="Pepperoni"
+            value="1"
             type="checkbox"
-            checked={state.toppings.includes("Pepperoni")}
+            checked={state.toppings.includes("1")}
             onChange={onChange}
           />
           Pepperoni<br />
@@ -128,9 +141,9 @@ export default function PizzaForm() {
           <input
             data-testid="checkGreenpeppers"
             name="2"
-            value="Green Peppers"
+            value="2"
             type="checkbox"
-            checked={state.toppings.includes("Green Peppers")}
+            checked={state.toppings.includes("2")}
             onChange={onChange}
           />
           Green Peppers<br />
@@ -139,9 +152,9 @@ export default function PizzaForm() {
           <input
             data-testid="checkPineapple"
             name="3"
-            value="Pineapple"
+            value="3"
             type="checkbox"
-            checked={state.toppings.includes("Pineapple")}
+            checked={state.toppings.includes("3")}
             onChange={onChange}
           />
           Pineapple<br />
@@ -150,9 +163,9 @@ export default function PizzaForm() {
           <input
             data-testid="checkMushrooms"
             name="4"
-            value="Mushrooms"
+            value="4"
             type="checkbox"
-            checked={state.toppings.includes("Mushrooms")}
+            checked={state.toppings.includes("4")}
             onChange={onChange}
           />
           Mushrooms<br />
@@ -161,9 +174,9 @@ export default function PizzaForm() {
           <input
             data-testid="checkHam"
             name="5"
-            value="Ham"
+            value="5"
             type="checkbox"
-            checked={state.toppings.includes("Ham")}
+            checked={state.toppings.includes("5")}
             onChange={onChange}
           />
           Ham<br />

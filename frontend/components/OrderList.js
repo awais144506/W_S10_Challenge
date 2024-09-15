@@ -1,14 +1,17 @@
 import React from 'react'
 import { useGetOrdersQuery } from '../state/userApi'
 export default function OrderList() {
-  const {data:orders} = useGetOrdersQuery()
+  const { data: orders } = useGetOrdersQuery()
   return (
     <div id="orderList">
       <h2>Pizza Orders</h2>
       <ol>
-      {orders && orders.map(order => (
+        {orders && orders.map(order => (
           <li key={order.id}>
-            {order.customer} ordered a size {order.size} with {order.toppings.length} {order.toppings.length===1?"topping":"toppings"}
+            {order.customer} ordered a size {order.size} with
+            {(order.toppings && order.toppings.length > 0)
+              ? `${order.toppings.length} ${order.toppings.length === 1 ? 'topping' : 'toppings'}`
+              : ' no toppings'} 
           </li>
         ))}
       </ol>
@@ -18,9 +21,12 @@ export default function OrderList() {
           ['All', 'S', 'M', 'L'].map(size => {
             const className = `button-filter${size === 'All' ? ' active' : ''}`
             return <button
+
               data-testid={`filterBtn${size}`}
               className={className}
-              key={size}>{size}</button>
+              key={size}>{size}
+
+            </button>
           })
         }
       </div>
